@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FoodDelivery Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-mark"><i class="fas fa-utensils"></i></div>
+                <div>
+                    <div class="brand-name">FoodDelivery</div>
+                    <div class="brand-sub">Fresh & Fast</div>
+                </div>
+            </div>
+
+            <label class="search-box" aria-label="Search menu">
+                <i class="fas fa-search"></i>
+                <input id="searchBar" type="text" placeholder="Search dishes or restaurants" />
+            </label>
+
+            <button class="cart-trigger" type="button" id="cartTrigger" aria-label="Open cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cartBadge">0</span>
+            </button>
+        </header>
+
+        <main>
+            <section class="hero-panel">
+                <div class="hero-copy">
+                    <span class="promo-badge"><i class="fas fa-tag"></i> 30% off for first orders</span>
+                    <h1>Crave-worthy food delivered in minutes.</h1>
+                    <p>Explore local favorites from pizza and burgers to sushi and smoothies.</p>
+                </div>
+                <div class="hero-meta">
+                    <div class="meta-card">
+                        <span class="meta-label">Delivering to</span>
+                        <strong id="deliveryLocation">Makati, Metro Manila</strong>
+                    </div>
+                    <div class="meta-card">
+                        <span class="meta-label">ETA</span>
+                        <strong id="deliveryWindow">25–30 min</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="catalog-toolbar">
+                <div class="chip-group" id="categoryFilters">
+                    <button class="chip active" data-filter="all" type="button">All</button>
+                    <button class="chip" data-filter="pizza" type="button">Pizza</button>
+                    <button class="chip" data-filter="burgers" type="button">Burgers</button>
+                    <button class="chip" data-filter="asian" type="button">Asian</button>
+                    <button class="chip" data-filter="drinks" type="button">Drinks</button>
+                </div>
+            </section>
+
+            <section id="catalogView" class="view active">
+                <div class="menu-grid" id="foodGrid"></div>
+            </section>
+
+            <section id="trackingView" class="view">
+                <div class="tracking-layout">
+                    <div class="tracking-panel">
+                        <div class="tracking-header">
+                            <div>
+                                <p class="eyebrow">Live order</p>
+                                <h2>Track your rider</h2>
+                            </div>
+                            <div class="order-id-box" id="orderIdBox">#FD-0000</div>
+                        </div>
+
+                        <div class="status-stack" id="orderStages">
+                            <div class="status-step active">
+                                <span class="status-dot"></span>
+                                <div>
+                                    <strong>Order Received</strong>
+                                    <small>Restaurant confirmed</small>
+                                </div>
+                            </div>
+                            <div class="status-step">
+                                <span class="status-dot"></span>
+                                <div>
+                                    <strong>Preparing</strong>
+                                    <small>Kitchen is cooking</small>
+                                </div>
+                            </div>
+                            <div class="status-step">
+                                <span class="status-dot"></span>
+                                <div>
+                                    <strong>Out for Delivery</strong>
+                                    <small>Rider is on the way</small>
+                                </div>
+                            </div>
+                            <div class="status-step">
+                                <span class="status-dot"></span>
+                                <div>
+                                    <strong>Delivered</strong>
+                                    <small>Enjoy your meal</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="eta-card">
+                            <div class="eta-label">Estimated arrival</div>
+                            <div class="eta-time" id="etaCountdown">24:00</div>
+                        </div>
+
+                        <div class="driver-card">
+                            <div class="driver-photo">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt="Driver" />
+                            </div>
+                            <div class="driver-info">
+                                <div class="driver-name">Alicia Chen</div>
+                                <div class="driver-rating"><i class="fas fa-star"></i> 4.9</div>
+                            </div>
+                            <a class="call-btn" href="tel:+1234567890" aria-label="Call driver">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                        </div>
+
+                        <button class="map-focus-btn" id="recenterMapBtn" type="button">Follow rider</button>
+                        <button class="map-focus-btn location-toggle-btn" id="useLocationBtn" type="button">Use live location</button>
+                        <p class="location-status" id="locationStatus" role="status" aria-live="polite">Location sharing is off</p>
+                    </div>
+
+                    <div class="map-panel" id="mapPanel">
+                        <div class="map-toolbar">
+                            <span class="map-label" id="mapRouteStatus">Waiting for route</span>
+                            <div class="map-actions">
+                                <button class="map-control-btn" id="maximizeMapBtn" type="button" aria-label="Maximize map">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button class="map-control-btn hidden" id="minimizeMapBtn" type="button" aria-label="Minimize map">
+                                    <i class="fas fa-compress"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <aside class="cart-panel" id="cartPanel" aria-label="Shopping cart">
+        <div class="cart-header">
+            <div>
+                <p class="eyebrow">Your order</p>
+                <h3>Cart</h3>
+            </div>
+            <button class="close-cart" id="closeCartBtn" type="button" aria-label="Close cart">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="cart-items" id="cartItems">
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Your cart is empty</p>
+                <span>Add a few delicious items to get started.</span>
+            </div>
+        </div>
+
+        <div class="summary-box" id="cartSummary" style="display: none;">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <strong id="subtotal">$0.00</strong>
+            </div>
+            <div class="summary-row">
+                <span>Delivery</span>
+                <strong id="deliveryFee">$0.00</strong>
+            </div>
+            <div class="summary-row">
+                <span>Tax</span>
+                <strong id="tax">$0.00</strong>
+            </div>
+            <div class="summary-row total-row">
+                <span>Total</span>
+                <strong id="total">$0.00</strong>
+            </div>
+            <button class="checkout-btn" type="button" id="checkoutBtn">Checkout</button>
+        </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Item added to cart</span>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="script.js"></script>
+</body>
+</html>
